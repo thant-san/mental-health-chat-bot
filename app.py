@@ -3,10 +3,10 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 @st.cache_resource
 def load_model():
-    # Load Hugging Face model and tokenizer
-    model_name = "your-huggingface-model-name"  # Replace with your model name
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    model_name = "bert-base-uncased"
+    hf_token = os.getenv("HUGGINGFACE_TOKE")
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_token)
+    model = AutoModel.from_pretrained(model_name, use_auth_token=hf_token)
     return tokenizer, model
 
 tokenizer, model = load_model()

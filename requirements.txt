@@ -1,5 +1,5 @@
 streamlit
-transformers==4.28.1
-torch==2.0.0
+transformers
+torch
 huggingface_hub
 python-dotenv

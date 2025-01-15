@@ -1,6 +1,6 @@
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
+import os
 @st.cache_resource
 def load_model():
     model_name = "bert-base-uncased"

@@ -1,5 +1,5 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModel
 import os
 
 # Cache the model and tokenizer
@@ -12,7 +12,7 @@ def load_model():
         raise ValueError("HUGGINGFACE_TOKEN environment variable is not set.")
     
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_token)
-    model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=hf_token)
+    model = AutoModel.from_pretrained(model_name, use_auth_token=hf_token)
     return tokenizer, model
 
 # Load the model and tokenizer

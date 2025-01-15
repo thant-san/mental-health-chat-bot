@@ -1,27 +1,27 @@
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# Load model and tokenizer from Hugging Face
+# Cache the model and tokenizer to improve performance
 @st.cache_resource
 def load_model():
-    model_name = "your-huggingface-model-name"  # Replace with your model's name
+    model_name = "thantsan/mental_health_finetuned"  # Replace with your Hugging Face model name
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name)
     return tokenizer, model
 
-tokenizer, model = load_model('thantsan/mental_health_finetuned')
+# Load the model
+st.title("Mental Health Chatbot")
+tokenizer, model = load_model()
 
-st.title("Hugging Face Model Deployment")
+# Create input for user text
+user_input = st.text_area("Enter your message:")
 
-# Input for user text
-user_input = st.text_input("Enter text:")
-
-if st.button("Predict"):
+if st.button("Get Response"):
     if user_input:
-        # Tokenize input
-        inputs = tokenizer(user_input, return_tensors="pt")  # Change to "tf" if using TensorFlow
+        # Tokenize and predict
+        inputs = tokenizer(user_input, return_tensors="pt")
         outputs = model(**inputs)
-        predictions = outputs.logits.argmax(dim=-1).item()  # Modify based on your model type
-        st.write("Bot Response:", predictions)
+        prediction = outputs.logits.argmax(dim=-1).item()
+        st.write(f"Prediction: {prediction}")
     else:
-        st.warning("Please enter text!")
+        st.warning("Please enter a message!")

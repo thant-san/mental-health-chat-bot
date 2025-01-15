@@ -18,11 +18,11 @@ def load_model():
     fine_tuned_model_name = "thantsan/mental_health_finetuned"
 
     # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, use_auth_token=hf_token)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name, token=hf_token)
 
     # Load base model and apply PEFT (LoRA) fine-tuning
-    base_model = AutoModelForCausalLM.from_pretrained(base_model_name, use_auth_token=hf_token)
-    model = PeftModel.from_pretrained(base_model, fine_tuned_model_name, use_auth_token=hf_token)
+    base_model = AutoModelForCausalLM.from_pretrained(base_model_name, token=hf_token)
+    model = PeftModel.from_pretrained(base_model, fine_tuned_model_name, token=hf_token)
 
     return tokenizer, model
 

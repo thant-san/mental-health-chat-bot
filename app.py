@@ -1,45 +1,61 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import PeftModel
 import os
 
-# Cache the model and tokenizer
+# Title of the app
+st.title("Mental Health Chatbot")
+st.write("A chatbot powered by your fine-tuned model for mental health guidance.")
+
+# Load model and tokenizer
 @st.cache_resource
 def load_model():
-    model_name = "thantsan/mental_health_finetuned"  # Replace with your model's path or name on Hugging Face
-    hf_token = os.getenv("HUGGINGFACE_TOKEN")
-    
-    if not hf_token:
-        raise ValueError("HUGGINGFACE_TOKEN environment variable is not set.")
-    
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_token)
-    model = AutoModel.from_pretrained(model_name, use_auth_token=hf_token)
+    # Access Hugging Face token from environment variables
+    hf_token = st.secrets["HUGGINGFACE_TOKEN"]  # Ensure this is added in secrets.toml
+
+    # Hugging Face model details
+    base_model_name = "unsloth/mistral-small-instruct-2409-bnb-4bit"
+    fine_tuned_model_name = "thantsan/mental_health_finetuned"
+
+    # Load tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name, use_auth_token=hf_token)
+
+    # Load base model and apply PEFT (LoRA) fine-tuning
+    base_model = AutoModelForCausalLM.from_pretrained(base_model_name, use_auth_token=hf_token)
+    model = PeftModel.from_pretrained(base_model, fine_tuned_model_name, use_auth_token=hf_token)
+
     return tokenizer, model
 
-# Load the model and tokenizer
-tokenizer, model = load_model()
+# Initialize model and tokenizer
+try:
+    tokenizer, model = load_model()
+except Exception as e:
+    st.error(f"Error loading the model: {e}")
+    st.stop()
 
-# Streamlit app title
-st.title("Custom Chatbot with Fine-Tuned Model")
-
-# User input section
+# User input
 user_input = st.text_input("You:", placeholder="Type your message here...")
 
-# Handle user input and generate a response
 if st.button("Send"):
-    if user_input.strip():  # Ensure input is not empty or whitespace
-        # Tokenize user input
-        inputs = tokenizer(user_input, return_tensors="pt")
-        
-        # Generate a response
-        outputs = model.generate(
-            inputs["input_ids"],
-            max_length=100,  # Adjust max_length based on your model
-            num_return_sequences=1,
-            pad_token_id=tokenizer.eos_token_id  # Handle padding token
-        )
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
-        # Display the bot's response
-        st.write(f"🤖 Bot: {response}")
+    if user_input:
+        try:
+            # Tokenize input
+            inputs = tokenizer(user_input, return_tensors="pt")
+
+            # Generate response
+            outputs = model.generate(
+                inputs["input_ids"],
+                max_length=150,  # Set a limit for response length
+                num_beams=5,     # Optional: Use beam search for better responses
+                no_repeat_ngram_size=2,  # Avoid repetitive responses
+                early_stopping=True,
+            )
+            response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            st.write(f"🤖 Bot: {response}")
+        except Exception as e:
+            st.error(f"Error during response generation: {e}")
     else:
         st.warning("Please type a message!")
+
+# Footer
+st.caption("Powered by a fine-tuned LoRA model.")

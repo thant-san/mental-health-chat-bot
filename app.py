@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 @st.cache_resource
 def load_model():
     model_name = "bert-base-uncased"
-    hf_token = os.getenv("HUGGINGFACE_TOKE")
+    hf_token = os.getenv("HUGGINGFACE_TOKEN")
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_token)
     model = AutoModel.from_pretrained(model_name, use_auth_token=hf_token)
     return tokenizer, model
